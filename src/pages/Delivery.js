@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Grid,
   Paper,
@@ -30,6 +30,8 @@ import {
   StepLabel,
   Avatar,
   LinearProgress,
+  Autocomplete,
+  Alert,
 } from '@mui/material';
 import {
   Search,
@@ -46,6 +48,7 @@ import {
   DirectionsCar,
   LocationOn,
   AccessTime,
+  ShoppingCart,
 } from '@mui/icons-material';
 
 const Delivery = () => {
@@ -53,8 +56,17 @@ const Delivery = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [activeStep, setActiveStep] = useState(2);
   const [filter, setFilter] = useState('all');
-
-  const deliverySteps = ['Scheduled', 'Loading', 'In Transit', 'Delivered'];
+  const [clients, setClients] = useState([]);
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [newOrderForm, setNewOrderForm] = useState({
+    client: '',
+    products: [],
+    deliveryDate: '',
+    notes: '',
+    contactPerson: '',
+    phone: '',
+    address: '',
+  });
 
   // Real delivery data
   const deliveries = [
@@ -132,20 +144,31 @@ const Delivery = () => {
     },
   ];
 
-  // Drivers data
-  const drivers = [
-    { id: 1, name: 'John Doe', phone: '+258 84 123 4567', vehicle: 'Truck BZ-123', rating: 4.8, deliveries: 45 },
-    { id: 2, name: 'Maria Silva', phone: '+258 84 234 5678', vehicle: 'Van BZ-456', rating: 4.6, deliveries: 38 },
-    { id: 3, name: 'Antonio', phone: '+258 84 345 6789', vehicle: 'Truck T-789', rating: 4.7, deliveries: 32 },
-    { id: 4, name: 'Carlos', phone: '+258 84 456 7890', vehicle: 'Van BZ-101', rating: 4.5, deliveries: 28 },
-  ];
+  // Load clients from shared data (in real app, this would come from Sales.js)
+  useEffect(() => {
+    // Sample clients from sales data
+    const sampleClients = [
+      { id: 1, name: 'China Mall', category: 'Supermercado', phone: '+258 84 XXX XXXX', address: 'Beira Center, Beira' },
+      { id: 2, name: 'VIP Spar Beira', category: 'Supermercado', phone: '+258 84 XXX XXXX', address: 'VIP Spar Building, Beira' },
+      { id: 3, name: 'Supermercado Mil Tete', category: 'Supermercado', phone: '+258 84 XXX XXXX', address: 'Tete City Center, Tete' },
+      { id: 4, name: 'Feliz Shopping', category: 'Supermercado', phone: '+258 84 XXX XXXX', address: 'Industrial Area, Beira' },
+      { id: 5, name: 'Vip Spar Supermercado Tete', category: 'Supermercado', phone: '+258 84 XXX XXXX', address: 'Tete' },
+      { id: 6, name: 'Supermercado HSK', category: 'Supermercado', phone: '+258 84 XXX XXXX', address: 'Beira' },
+      { id: 7, name: 'Supermercado Altaj', category: 'Supermercado', phone: '+258 84 XXX XXXX', address: 'Beira' },
+    ];
+    setClients(sampleClients);
+  }, []);
 
-  // Vehicles data
-  const vehicles = [
-    { id: 1, plate: 'BZ-123', type: 'Truck', capacity: '5000 kg', status: 'Active', lastService: '2024-01-10' },
-    { id: 2, plate: 'BZ-456', type: 'Van', capacity: '1500 kg', status: 'Active', lastService: '2024-01-12' },
-    { id: 3, plate: 'T-789', type: 'Truck', capacity: '5000 kg', status: 'Active', lastService: '2024-01-08' },
-    { id: 4, plate: 'BZ-101', type: 'Van', capacity: '1500 kg', status: 'Maintenance', lastService: '2024-01-15' },
+  // Products data
+  const products = [
+    { id: 'SM12B', name: 'SAMOSSA12-BEEF', price: 155.00, category: 'SAMOSSA 12Uni' },
+    { id: 'SM12F', name: 'SAMOSSA12-FRANGO', price: 155.00, category: 'SAMOSSA 12Uni' },
+    { id: 'SM24B', name: 'SAMOSSA24-BEEF', price: 225.00, category: 'SAMOSSA 24Uni' },
+    { id: 'S300VN', name: 'SORVET300ML-VANILLA', price: 75.00, category: 'SORVET 300ML' },
+    { id: 'S5LVN', name: 'SORVET5L-VANILLA', price: 800.00, category: 'SORVET 5L' },
+    { id: 'SP24F', name: 'SPRINGROLL24-FRANGO', price: 225.00, category: 'SPRING ROLL 24 Uni' },
+    { id: 'RS24C', name: 'RESSOIS24-CAMARAO', price: 225.00, category: 'RESSOIS 24 Uni' },
+    { id: 'S300CH', name: 'SORVET300ML-CHOCOLATE', price: 75.00, category: 'SORVET 300ML' },
   ];
 
   const filteredDeliveries = deliveries.filter(delivery => {
@@ -186,13 +209,92 @@ const Delivery = () => {
     delayed: deliveries.filter(d => d.status === 'delayed').length,
   };
 
+  const handleCreateOrder = () => {
+    // In real app, this would create an order in the Orders component
+    const newOrder = {
+      client: selectedClient.name,
+      products: newOrderForm.products,
+      deliveryDate: newOrderForm.deliveryDate,
+      notes: newOrderForm.notes,
+      contactPerson: selectedClient.contactPerson || newOrderForm.contactPerson,
+      phone: selectedClient.phone || newOrderForm.phone,
+      address: selectedClient.address || newOrderForm.address,
+      status: 'pending',
+      needsProduction: false, // This will be set by production team
+    };
+    
+    console.log('Creating new order:', newOrder);
+    
+    // Show success message
+    alert(`Order created successfully for ${selectedClient.name}. Production team has been notified to check inventory.`);
+    
+    // Reset form
+    setSelectedClient(null);
+    setNewOrderForm({
+      client: '',
+      products: [],
+      deliveryDate: '',
+      notes: '',
+      contactPerson: '',
+      phone: '',
+      address: '',
+    });
+    setOpenDialog(false);
+  };
+
+  const handleClientSelect = (event, newValue) => {
+    setSelectedClient(newValue);
+    if (newValue) {
+      setNewOrderForm(prev => ({
+        ...prev,
+        contactPerson: newValue.contactPerson || '',
+        phone: newValue.phone || '',
+        address: newValue.address || '',
+      }));
+    }
+  };
+
+  const handleAddProduct = () => {
+    setNewOrderForm(prev => ({
+      ...prev,
+      products: [...prev.products, { id: '', quantity: 1 }]
+    }));
+  };
+
+  const handleProductChange = (index, field, value) => {
+    const updatedProducts = [...newOrderForm.products];
+    updatedProducts[index][field] = value;
+    setNewOrderForm(prev => ({
+      ...prev,
+      products: updatedProducts
+    }));
+  };
+
+  const handleRemoveProduct = (index) => {
+    const updatedProducts = newOrderForm.products.filter((_, i) => i !== index);
+    setNewOrderForm(prev => ({
+      ...prev,
+      products: updatedProducts
+    }));
+  };
+
   return (
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4">Delivery Management</Typography>
-        <Button variant="contained" startIcon={<Add />} onClick={() => setOpenDialog(true)}>
-          Schedule Delivery
-        </Button>
+        <Box>
+          <Button 
+            variant="outlined" 
+            startIcon={<ShoppingCart />} 
+            onClick={() => setOpenDialog(true)}
+            sx={{ mr: 2 }}
+          >
+            Create Order
+          </Button>
+          <Button variant="contained" startIcon={<Add />} onClick={() => setOpenDialog(true)}>
+            Schedule Delivery
+          </Button>
+        </Box>
       </Box>
 
       <Grid container spacing={3}>
@@ -389,200 +491,149 @@ const Delivery = () => {
           </Paper>
         </Grid>
 
-        {/* Driver Performance */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Driver Performance
-            </Typography>
-            <Grid container spacing={2}>
-              {drivers.map((driver) => (
-                <Grid item xs={12} key={driver.id}>
-                  <Card variant="outlined">
-                    <CardContent>
-                      <Box display="flex" justifyContent="space-between" alignItems="center">
-                        <Box display="flex" alignItems="center">
-                          <Avatar sx={{ width: 40, height: 40, mr: 2, bgcolor: 'primary.main' }}>
-                            {driver.name.charAt(0)}
-                          </Avatar>
-                          <Box>
-                            <Typography variant="subtitle2">{driver.name}</Typography>
-                            <Typography variant="caption" color="textSecondary">
-                              {driver.vehicle} • {driver.deliveries} deliveries
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <Box textAlign="right">
-                          <Chip label={`${driver.rating}/5`} size="small" color="primary" />
-                          <Typography variant="caption" display="block" color="textSecondary">
-                            Rating
-                          </Typography>
-                        </Box>
-                      </Box>
-                      <LinearProgress
-                        variant="determinate"
-                        value={(driver.deliveries / 50) * 100}
-                        sx={{ mt: 1, height: 6, borderRadius: 3 }}
-                      />
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Paper>
-        </Grid>
+        {/* Create Order Dialog */}
+        <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
+          <DialogTitle>Create New Order</DialogTitle>
+          <DialogContent>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              This order will trigger production planning if inventory is insufficient
+            </Alert>
+            
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              <Grid item xs={12}>
+                <Autocomplete
+                  options={clients}
+                  getOptionLabel={(option) => option.name}
+                  value={selectedClient}
+                  onChange={handleClientSelect}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Select Client"
+                      placeholder="Search existing clients..."
+                      required
+                    />
+                  )}
+                />
+              </Grid>
 
-        {/* Vehicle Status */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Vehicle Status
-            </Typography>
-            <TableContainer>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Plate</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Capacity</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Last Service</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {vehicles.map((vehicle) => (
-                    <TableRow key={vehicle.id}>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight="bold">
-                          {vehicle.plate}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>{vehicle.type}</TableCell>
-                      <TableCell>{vehicle.capacity}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={vehicle.status}
+              {selectedClient && (
+                <>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Contact Person"
+                      value={newOrderForm.contactPerson}
+                      onChange={(e) => setNewOrderForm(prev => ({ ...prev, contactPerson: e.target.value }))}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Phone"
+                      value={newOrderForm.phone}
+                      onChange={(e) => setNewOrderForm(prev => ({ ...prev, phone: e.target.value }))}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Address"
+                      value={newOrderForm.address}
+                      onChange={(e) => setNewOrderForm(prev => ({ ...prev, address: e.target.value }))}
+                      multiline
+                      rows={2}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="Delivery Date"
+                      value={newOrderForm.deliveryDate}
+                      onChange={(e) => setNewOrderForm(prev => ({ ...prev, deliveryDate: e.target.value }))}
+                      InputLabelProps={{ shrink: true }}
+                      required
+                    />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Products
+                    </Typography>
+                    {newOrderForm.products.map((product, index) => (
+                      <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
+                        <FormControl sx={{ minWidth: 200 }} size="small">
+                          <InputLabel>Product</InputLabel>
+                          <Select
+                            value={product.id}
+                            label="Product"
+                            onChange={(e) => handleProductChange(index, 'id', e.target.value)}
+                          >
+                            <MenuItem value="">Select Product</MenuItem>
+                            {products.map((prod) => (
+                              <MenuItem key={prod.id} value={prod.id}>
+                                {prod.name} (MZN {prod.price})
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                        <TextField
+                          type="number"
+                          label="Quantity"
                           size="small"
-                          color={vehicle.status === 'Active' ? 'success' : 'warning'}
+                          value={product.quantity}
+                          onChange={(e) => handleProductChange(index, 'quantity', parseInt(e.target.value))}
+                          sx={{ width: 100 }}
+                          inputProps={{ min: 1 }}
                         />
-                      </TableCell>
-                      <TableCell>{vehicle.lastService}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <Button fullWidth variant="outlined" sx={{ mt: 2 }}>
-              View Maintenance Schedule
+                        <Button
+                          color="error"
+                          size="small"
+                          onClick={() => handleRemoveProduct(index)}
+                          disabled={newOrderForm.products.length === 1}
+                        >
+                          Remove
+                        </Button>
+                      </Box>
+                    ))}
+                    <Button
+                      startIcon={<Add />}
+                      onClick={handleAddProduct}
+                      variant="outlined"
+                      size="small"
+                    >
+                      Add Product
+                    </Button>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Notes"
+                      value={newOrderForm.notes}
+                      onChange={(e) => setNewOrderForm(prev => ({ ...prev, notes: e.target.value }))}
+                      multiline
+                      rows={3}
+                      placeholder="Special instructions or requirements..."
+                    />
+                  </Grid>
+                </>
+              )}
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+            <Button 
+              variant="contained" 
+              onClick={handleCreateOrder}
+              disabled={!selectedClient || !newOrderForm.deliveryDate || newOrderForm.products.length === 0}
+            >
+              Create Order
             </Button>
-          </Paper>
-        </Grid>
-
-        {/* Delivery Analytics */}
-        <Grid item xs={12}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Delivery Performance
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={6} sm={3}>
-                <Card>
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="h5" color="success.main">92%</Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      On-Time Delivery
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={6} sm={3}>
-                <Card>
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="h5">2.3</Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      Avg. Delivery Days
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={6} sm={3}>
-                <Card>
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="h5" color="error.main">8%</Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      Delayed Deliveries
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={6} sm={3}>
-                <Card>
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="h5" color="success.main">98%</Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      Customer Satisfaction
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
+          </DialogActions>
+        </Dialog>
       </Grid>
-
-      {/* Schedule Delivery Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Schedule New Delivery</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Select Order</InputLabel>
-                <Select label="Select Order">
-                  <MenuItem value="ORD-001">ORD-001 - China Mall</MenuItem>
-                  <MenuItem value="ORD-002">ORD-002 - VIP Spar Beira</MenuItem>
-                  <MenuItem value="ORD-003">ORD-003 - Supermercado Mil Tete</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Select Driver</InputLabel>
-                <Select label="Select Driver">
-                  {drivers.map((driver) => (
-                    <MenuItem key={driver.id} value={driver.id}>
-                      {driver.name} ({driver.vehicle})
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                type="datetime-local"
-                label="Delivery Time"
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                multiline
-                rows={3}
-                label="Delivery Instructions"
-                placeholder="Special instructions for driver..."
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => setOpenDialog(false)}>
-            Schedule Delivery
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };
