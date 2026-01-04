@@ -1,95 +1,169 @@
-import axios from 'axios';
+// src/services/googleSheets.js
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
 
-// Google Sheets API configuration
-const API_KEY = 'YOUR_GOOGLE_SHEETS_API_KEY';
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID';
+class GoogleSheetsService {
+  constructor() {
+    this.baseUrl = API_URL;
+  }
 
-const ranges = {
-  clients: 'CLIENTS!A:K',
-  products: 'PRODUCTS!A:L',
-  orders: 'ORDERS!A:N',
-  production: 'PRODUCTION!A:J',
-  delivery: 'DELIVERY!A:I',
-  inventory: 'INVENTORY!A:G',
-  sales: 'SALES!A:H',
-};
-
-export const googleSheetsService = {
-  async getClients() {
+  // Test connection to backend
+  async testConnection() {
     try {
-      const response = await axios.get(
-        `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${ranges.clients}`,
-        {
-          params: { key: API_KEY },
-        }
-      );
-      return this.parseSheetData(response.data.values);
+      const response = await fetch(`${this.baseUrl}/api/test`);
+      const data = await response.json();
+      return {
+        success: data.success,
+        message: data.message,
+        timestamp: data.timestamp
+      };
     } catch (error) {
-      console.error('Error fetching clients:', error);
-      return [];
+      return {
+        success: false,
+        error: `Cannot connect to backend: ${error.message}`,
+        tip: 'Make sure backend server is running on port 5001'
+      };
     }
-  },
+  }
 
-  async getProducts() {
+  // Read data from sheet
+  async readData(range = 'Sheet1!A1:C100') {
     try {
-      const response = await axios.get(
-        `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${ranges.products}`,
-        {
-          params: { key: API_KEY },
-        }
-      );
-      return this.parseSheetData(response.data.values);
+      const response = await fetch(`${this.baseUrl}/api/sheets/${encodeURIComponent(range)}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        return {
+          success: true,
+          data: data.data,
+          range: data.range,
+          headers: data.data[0] || [],
+          rows: data.data.slice(1)
+        };
+      } else {
+        return {
+          success: false,
+          error: data.error,
+          hint: data.hint || 'Check sheet sharing and range format'
+        };
+      }
     } catch (error) {
-      console.error('Error fetching products:', error);
-      return [];
+      return {
+        success: false,
+        error: `Network error: ${error.message}`
+      };
     }
-  },
+  }
 
-  async getOrders() {
+  // Add new row to sheet
+  async addRow(sheetName = 'Sheet1', rowData) {
     try {
-      const response = await axios.get(
-        `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${ranges.orders}`,
-        {
-          params: { key: API_KEY },
-        }
-      );
-      return this.parseSheetData(response.data.values);
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-      return [];
-    }
-  },
-
-  parseSheetData(values) {
-    if (!values || values.length < 2) return [];
-    
-    const headers = values[0];
-    const rows = values.slice(1);
-    
-    return rows.map(row => {
-      const obj = {};
-      headers.forEach((header, index) => {
-        obj[header.toLowerCase().replace(/\s+/g, '_')] = row[index] || '';
-      });
-      return obj;
-    });
-  },
-
-  async updateSheet(range, values) {
-    try {
-      const response = await axios.put(
-        `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}`,
-        {
-          values: [values],
+      const response = await fetch(`${this.baseUrl}/api/sheets/append`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        {
-          params: { key: API_KEY, valueInputOption: 'RAW' },
-        }
-      );
-      return response.data;
+        body: JSON.stringify({
+          range: sheetName,
+          values: [rowData]
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        return {
+          success: true,
+          message: data.message,
+          updatedRange: data.updatedRange
+        };
+      } else {
+        return {
+          success: false,
+          error: data.error
+        };
+      }
     } catch (error) {
-      console.error('Error updating sheet:', error);
-      throw error;
+      return {
+        success: false,
+        error: `Failed to add row: ${error.message}`
+      };
     }
-  },
-};
+  }
+
+  // Update specific cell
+  async updateCell(range, value) {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/sheets/write`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          range: range,
+          values: [[value]]
+        })
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to update cell: ${error.message}`
+      };
+    }
+  }
+
+  // Get sheet metadata
+  async getSheetInfo() {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/sheets-info`);
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to get sheet info: ${error.message}`
+      };
+    }
+  }
+
+  // Search in sheet data
+  searchData(data, searchTerm) {
+    if (!searchTerm) return data;
+    
+    return data.filter(row => 
+      row.some(cell => 
+        cell && cell.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  }
+
+  // Format data for display
+  formatDataForTable(sheetData) {
+    if (!sheetData || sheetData.length === 0) {
+      return { headers: [], rows: [] };
+    }
+
+    const headers = sheetData[0];
+    const rows = sheetData.slice(1);
+    
+    return {
+      headers: headers.map((header, index) => ({
+        key: `col_${index}`,
+        label: header || `Column ${index + 1}`
+      })),
+      rows: rows.map((row, rowIndex) => ({
+        id: rowIndex,
+        cells: row.map((cell, cellIndex) => ({
+          value: cell,
+          key: `cell_${rowIndex}_${cellIndex}`
+        }))
+      }))
+    };
+  }
+}
+
+// Create singleton instance
+const googleSheetsService = new GoogleSheetsService();
+export default googleSheetsService;

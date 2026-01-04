@@ -1,11 +1,16 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate,  Link } from 'react-router-dom';
+import { GoogleSheetsProvider } from './context/GoogleSheetsContext';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import GoogleSheetsPage from './pages/GoogleSheetsPage';
 import CssBaseline from '@mui/material/CssBaseline';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
 import Orders from './pages/Orders';
+import HomePage from './pages/HomePage';
+import AboutPage from './pages/AboutPage';
+import './App.css';
 import Inventory from './pages/Inventory';
 import Production from './pages/Production';
 import Delivery from './pages/Delivery';
@@ -132,11 +137,23 @@ const AppRoutes = () => {
       } />
     </Routes>
   );
-};
-
-function App() {
+  
+};function App() {
   return (
-    <ThemeProvider theme={theme}>
+    <GoogleSheetsProvider>
+      <Router>
+        <div className="App">
+          <nav className="main-nav">
+            <div className="nav-brand">
+              <h1>Food Champion Factory</h1>
+            </div>
+            <ul className="nav-links">
+              <li><Link to="/">Home</Link></li>
+              <li><Link to="/sheets">Google Sheets DB</Link></li>
+              <li><Link to="/about">About</Link></li>
+            </ul>
+          </nav>
+		  <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
         <Router>
@@ -144,7 +161,25 @@ function App() {
         </Router>
       </AuthProvider>
     </ThemeProvider>
+
+          <main className="main-content">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/sheets" element={<GoogleSheetsPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              {/* Add your existing routes */}
+            </Routes>
+          </main>
+
+          <footer className="main-footer">
+            <p>© {new Date().getFullYear()} Food Champion Factory. Using Google Sheets as Database.</p>
+          </footer>
+        </div>
+      </Router>
+    </GoogleSheetsProvider>
   );
 }
+
+
 
 export default App;
