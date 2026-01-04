@@ -134,7 +134,6 @@ const StatCard = styled(Card)(({ theme }) => ({
   }
 }));
 
-
 const ModernButton = styled(Button)(({ theme }) => ({
   borderRadius: '10px',
   textTransform: 'none',
@@ -874,145 +873,7 @@ const parseExcelData = () => {
     'VIP Spar Supermercado Chimoio': 'Supermercado',
     'Vip Spar Supermercado Tete': 'Supermercado'
   };
-// Updated Sales.js - Adding order linking functionality
 
-// Add this function to parse orders from Orders.js data
-const parseOrdersData = () => {
-  return [
-    {
-      id: 'ORD-001',
-      client: 'China Mall',
-      date: '2024-01-15',
-      products: [
-        { name: 'SAMOSSA24-BEEF', quantity: 5, price: 'MZN 225', total: 'MZN 1,125' },
-        { name: 'SORVET5L-VANILLA', quantity: 2, price: 'MZN 800', total: 'MZN 1,600' },
-      ],
-      total: 'MZN 2,725',
-      status: 'pending',
-      payment: 'Pending',
-      deliveryId: null,
-      needsProduction: false,
-    },
-    {
-      id: 'ORD-002',
-      client: 'VIP Spar Beira',
-      date: '2024-01-15',
-      products: [
-        { name: 'SPRINGROLL24-FRANGO', quantity: 3, price: 'MZN 225', total: 'MZN 675' },
-        { name: 'RESSOIS24-CAMARAO', quantity: 2, price: 'MZN 225', total: 'MZN 450' },
-      ],
-      total: 'MZN 1,125',
-      status: 'processing',
-      payment: 'Pending',
-      deliveryId: null,
-      needsProduction: true,
-    },
-    // Add more orders...
-  ];
-};
-
-// In the Sales component, add state for orders
-const [orders, setOrders] = useState(parseOrdersData());
-const [selectedOrder, setSelectedOrder] = useState(null);
-
-// In the "Create New Invoice" dialog, add order selection field:
-const handleClientSelectForInvoice = (clientName) => {
-  const clientData = uniqueClients.find(c => c.name === clientName);
-  if (clientData) {
-    // Find pending orders for this client
-    const clientOrders = orders.filter(order => 
-      order.client === clientName && 
-      order.status === 'pending' && 
-      !order.saleId
-    );
-    
-    setSaleForm(prev => ({
-      ...prev,
-      client: clientData.name,
-      clientId: clientData.id,
-      clientType: clientData.category || '',
-      contactPerson: clientData.contactPerson || '',
-      phone: clientData.phone || '',
-      email: clientData.email || '',
-      availableOrders: clientOrders
-    }));
-  }
-};
-
-// In the "Create New Invoice" dialog form, add this field after client selection:
-<Grid item xs={12}>
-  <FormControl fullWidth>
-    <InputLabel>Link to Order (Optional)</InputLabel>
-    <Select
-      value={saleForm.linkedOrderId || ''}
-      onChange={(e) => {
-        const orderId = e.target.value;
-        setSelectedOrder(orders.find(o => o.id === orderId));
-        setSaleForm(prev => ({ ...prev, linkedOrderId: orderId }));
-      }}
-      label="Link to Order (Optional)"
-    >
-      <MenuItem value="">No Order Link</MenuItem>
-      {saleForm.availableOrders?.map((order) => (
-        <MenuItem key={order.id} value={order.id}>
-          {order.id} - {order.client} (MZN {order.total})
-        </MenuItem>
-      ))}
-    </Select>
-  </FormControl>
-  {selectedOrder && (
-    <Alert severity="info" sx={{ mt: 1 }}>
-      Order {selectedOrder.id} selected. Total: {selectedOrder.total}
-    </Alert>
-  )}
-</Grid>
-
-// Update handleAddSale function to link sale to order
-const handleAddSale = () => {
-  if (!saleForm.clientId || saleForm.products.some(p => !p.id || p.quantity <= 0)) {
-    setSnackbar({
-      open: true,
-      message: 'Please fill in all required fields and add at least one product',
-      severity: 'error'
-    });
-    return;
-  }
-
-  setLoading(true);
-  setTimeout(() => {
-    // ... existing sale creation code ...
-
-    // If linked to an order, update order status
-    if (saleForm.linkedOrderId) {
-      const updatedOrders = orders.map(order => {
-        if (order.id === saleForm.linkedOrderId) {
-          return {
-            ...order,
-            status: 'processing',
-            saleId: newSale.id,
-            payment: saleForm.paymentAmount >= totalAmount ? 'Paid' : 'Pending'
-          };
-        }
-        return order;
-      });
-      setOrders(updatedOrders);
-      
-      setSnackbar({
-        open: true,
-        message: `Invoice created and linked to order ${saleForm.linkedOrderId}. Production team notified.`,
-        severity: 'success'
-      });
-    } else {
-      setSnackbar({
-        open: true,
-        message: `Invoice created successfully! Guide #${guideNumber}`,
-        severity: 'success'
-      });
-    }
-
-    // ... rest of the function ...
-  }, 1000);
-};
   // Transform data to match the initialSalesData structure
   return debtorsData.map((item, index) => {
     const debt = item.debt;
@@ -1123,7 +984,41 @@ const handleAddSale = () => {
 // ==================== INITIAL SALES DATA ====================
 const initialSalesData = parseExcelData();
 
-// ==================== COMPONENT ====================
+// ==================== ORDER DATA PARSING ====================
+const parseOrdersData = () => {
+  return [
+    {
+      id: 'ORD-001',
+      client: 'China Mall',
+      date: '2024-01-15',
+      products: [
+        { name: 'SAMOSSA24-BEEF', quantity: 5, price: 'MZN 225', total: 'MZN 1,125' },
+        { name: 'SORVET5L-VANILLA', quantity: 2, price: 'MZN 800', total: 'MZN 1,600' },
+      ],
+      total: 'MZN 2,725',
+      status: 'pending',
+      payment: 'Pending',
+      deliveryId: null,
+      needsProduction: false,
+    },
+    {
+      id: 'ORD-002',
+      client: 'VIP Spar Beira',
+      date: '2024-01-15',
+      products: [
+        { name: 'SPRINGROLL24-FRANGO', quantity: 3, price: 'MZN 225', total: 'MZN 675' },
+        { name: 'RESSOIS24-CAMARAO', quantity: 2, price: 'MZN 225', total: 'MZN 450' },
+      ],
+      total: 'MZN 1,125',
+      status: 'processing',
+      payment: 'Pending',
+      deliveryId: null,
+      needsProduction: true,
+    },
+  ];
+};
+
+// ==================== TAB PANEL COMPONENT ====================
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
   return (
@@ -1139,13 +1034,17 @@ function TabPanel(props) {
   );
 }
 
+// ==================== MAIN SALES COMPONENT ====================
 const Sales = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const { user } = useAuth();
 
+  // State declarations
   const [salesData, setSalesData] = useState(initialSalesData);
+  const [orders, setOrders] = useState(parseOrdersData());
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -1189,6 +1088,8 @@ const Sales = () => {
     email: '',
     address: '',
     supplyDate: new Date(),
+    availableOrders: [],
+    linkedOrderId: '',
   });
 
   // Payment form state
@@ -1318,6 +1219,8 @@ const Sales = () => {
       email: '',
       address: '',
       supplyDate: new Date(),
+      availableOrders: [],
+      linkedOrderId: '',
     });
     setAddSaleDialogOpen(true);
   };
@@ -1392,7 +1295,31 @@ const Sales = () => {
     setPage(0);
   };
 
-  // Handle add sale
+  // Handle client selection for invoice with order linking
+  const handleClientSelectForInvoice = (clientName) => {
+    const clientData = uniqueClients.find(c => c.name === clientName);
+    if (clientData) {
+      // Find pending orders for this client
+      const clientOrders = orders.filter(order => 
+        order.client === clientName && 
+        order.status === 'pending' && 
+        !order.saleId
+      );
+      
+      setSaleForm(prev => ({
+        ...prev,
+        client: clientData.name,
+        clientId: clientData.id,
+        clientType: clientData.category || '',
+        contactPerson: clientData.contactPerson || '',
+        phone: clientData.phone || '',
+        email: clientData.email || '',
+        availableOrders: clientOrders
+      }));
+    }
+  };
+
+  // Handle add sale with order linking
   const handleAddSale = () => {
     if (!saleForm.clientId || saleForm.products.some(p => !p.id || p.quantity <= 0)) {
       setSnackbar({
@@ -1474,13 +1401,37 @@ const Sales = () => {
       };
 
       setSalesData(prev => [...prev, newSale]);
+      
+      // If linked to an order, update order status
+      if (saleForm.linkedOrderId) {
+        const updatedOrders = orders.map(order => {
+          if (order.id === saleForm.linkedOrderId) {
+            return {
+              ...order,
+              status: 'processing',
+              saleId: newSale.id,
+              payment: saleForm.paymentAmount >= totalAmount ? 'Paid' : 'Pending'
+            };
+          }
+          return order;
+        });
+        setOrders(updatedOrders);
+        
+        setSnackbar({
+          open: true,
+          message: `Invoice created and linked to order ${saleForm.linkedOrderId}. Production team notified.`,
+          severity: 'success'
+        });
+      } else {
+        setSnackbar({
+          open: true,
+          message: `Invoice created successfully! Guide #${guideNumber}`,
+          severity: 'success'
+        });
+      }
+
       setLoading(false);
       setAddSaleDialogOpen(false);
-      setSnackbar({
-        open: true,
-        message: `Sale added successfully! Guide #${guideNumber} created`,
-        severity: 'success'
-      });
       
       setSaleForm({
         client: '',
@@ -1500,6 +1451,8 @@ const Sales = () => {
         email: '',
         address: '',
         supplyDate: new Date(),
+        availableOrders: [],
+        linkedOrderId: '',
       });
     }, 1000);
   };
@@ -1776,22 +1729,6 @@ const Sales = () => {
       ...prev,
       amountPaid: newAmountPaid
     }));
-  };
-
-  // Handle client selection for new invoice
-  const handleClientSelectForInvoice = (clientName) => {
-    const clientData = uniqueClients.find(c => c.name === clientName);
-    if (clientData) {
-      setSaleForm(prev => ({
-        ...prev,
-        client: clientData.name,
-        clientId: clientData.id,
-        clientType: clientData.category || '',
-        contactPerson: clientData.contactPerson || '',
-        phone: clientData.phone || '',
-        email: clientData.email || ''
-      }));
-    }
   };
 
   return (
@@ -2143,7 +2080,7 @@ const Sales = () => {
           <TabPanel value={tabValue} index={0}>
             <Box>
               <StyledTableContainer>
-                <Table size={isMobile ? 'small' : 'medium'} stickyHeader>
+                <Table size={isMobile ? 'small' : 'medium'} stickyHeader id="sales-table">
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ width: '3%' }}></TableCell>
@@ -2694,7 +2631,7 @@ const Sales = () => {
           </TabPanel>
         </PremiumCard>
 
-        {/* Payment Dialog - UPDATED with discount and non-editable invoice details */}
+        {/* Payment Dialog */}
         <Dialog
           open={paymentDialogOpen}
           onClose={() => {
@@ -3170,7 +3107,7 @@ const Sales = () => {
           </DialogActions>
         </Dialog>
 
-        {/* Add Sale Dialog - UPDATED with client dropdown */}
+        {/* Add Sale Dialog with Order Linking */}
         <Dialog
           open={addSaleDialogOpen}
           onClose={() => setAddSaleDialogOpen(false)}
@@ -3212,6 +3149,33 @@ const Sales = () => {
                       ))}
                     </Select>
                   </FormControl>
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel>Link to Order (Optional)</InputLabel>
+                    <Select
+                      value={saleForm.linkedOrderId || ''}
+                      onChange={(e) => {
+                        const orderId = e.target.value;
+                        setSelectedOrder(orders.find(o => o.id === orderId));
+                        setSaleForm(prev => ({ ...prev, linkedOrderId: orderId }));
+                      }}
+                      label="Link to Order (Optional)"
+                    >
+                      <MenuItem value="">No Order Link</MenuItem>
+                      {saleForm.availableOrders?.map((order) => (
+                        <MenuItem key={order.id} value={order.id}>
+                          {order.id} - {order.client} ({order.total})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  {selectedOrder && (
+                    <Alert severity="info" sx={{ mt: 1 }}>
+                      Order {selectedOrder.id} selected. Total: {selectedOrder.total}
+                    </Alert>
+                  )}
                 </Grid>
                 
                 <Grid item xs={12} sm={6}>
