@@ -639,76 +639,81 @@ const products = [
       </Dialog>
 
       {/* New Order Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Create New Order</DialogTitle>
-        <DialogContent>
-          <Alert severity="info" sx={{ mb: 2 }}>
-            This order will automatically trigger production check if inventory is insufficient
-          </Alert>
-          
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Client</InputLabel>
-                <Select label="Client">
-                  <MenuItem value="china-mall">China Mall</MenuItem>
-                  <MenuItem value="vip-spar">VIP Spar Beira</MenuItem>
-                  <MenuItem value="feliz-shopping">Feliz Shopping</MenuItem>
-                  <MenuItem value="supermercado-mil">Supermercado Mil Tete</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                type="date"
-                label="Delivery Date"
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="subtitle2" gutterBottom>
-                Select Products
-              </Typography>
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Product</TableCell>
-                      <TableCell>Price</TableCell>
-                      <TableCell>Quantity</TableCell>
-                      <TableCell>Total</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {products.slice(0, 3).map((product) => (
-                      <TableRow key={product.id}>
-                        <TableCell>{product.name}</TableCell>
-                        <TableCell>{product.price}</TableCell>
-                        <TableCell>
-                          <TextField type="number" size="small" defaultValue="0" />
-                        </TableCell>
-                        <TableCell>MZN 0</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Grid>
-            <Grid item xs={12}>
-              <Alert severity="warning">
-                Note: After creating this order, the production team will be notified to check inventory availability.
-              </Alert>
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => setOpenDialog(false)}>
-            Create Order
-          </Button>
-        </DialogActions>
-      </Dialog>
+<Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
+  <DialogTitle>Create New Order</DialogTitle>
+  <DialogContent>
+    <Alert severity="info" sx={{ mb: 2 }}>
+      This order will automatically trigger production check if inventory is insufficient
+    </Alert>
+    
+    <Grid container spacing={2} sx={{ mt: 1 }}>
+      <Grid item xs={12} md={6}>
+        <FormControl fullWidth>
+          <InputLabel>Client</InputLabel>
+          <Select label="Client">
+            <MenuItem value="china-mall">China Mall</MenuItem>
+            <MenuItem value="vip-spar">VIP Spar Beira</MenuItem>
+            <MenuItem value="feliz-shopping">Feliz Shopping</MenuItem>
+            <MenuItem value="supermercado-mil">Supermercado Mil Tete</MenuItem>
+          </Select>
+        </FormControl>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <TextField
+          fullWidth
+          type="date"
+          label="Delivery Date"
+          InputLabelProps={{ shrink: true }}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <Typography variant="subtitle2" gutterBottom>
+          Select Products
+        </Typography>
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Product</TableCell>
+                <TableCell>Price</TableCell>
+                <TableCell>Quantity</TableCell>
+                <TableCell>Total</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {products.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell>{product.name}</TableCell>
+                  <TableCell>{product.price || 'N/A'}</TableCell>
+                  <TableCell>
+                    <TextField 
+                      type="number" 
+                      size="small" 
+                      defaultValue="0" 
+                      inputProps={{ min: 0 }}
+                    />
+                  </TableCell>
+                  <TableCell>MZN 0</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Grid>
+      <Grid item xs={12}>
+        <Alert severity="warning">
+          Note: After creating this order, the production team will be notified to check inventory availability.
+        </Alert>
+      </Grid>
+    </Grid>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+    <Button variant="contained" onClick={() => setOpenDialog(false)}>
+      Create Order
+    </Button>
+  </DialogActions>
+</Dialog>
     </Box>
   );
 };
