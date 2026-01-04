@@ -134,7 +134,7 @@ const Orders = () => {
     { id: 'SM12I', name: 'SAMOSSA12-INTEGRAL', price: 'MZN 155.00', category: 'SAMOSSA 12Uni' },
     { id: 'SM24B', name: 'SAMOSSA24-BEEF', price: 'MZN 225.00', category: 'SAMOSSA 24Uni' },
     { id: 'SM24F', name: 'SAMOSSA24-FRANGO', price: 'MZN 225.00', category: 'SAMOSSA 24Uni' },
-    { id: 'SM24P', name: 'SAMOSSA24-FRANGO', price: 'MZN 225.00', category: 'SAMOSSA 24Uni' },
+    { id: 'SM24P', name: 'SAMOSSA24-PEIXE', price: 'MZN 225.00', category: 'SAMOSSA 24Uni' },
     { id: 'SM24I', name: 'SAMOSSA24-CAMARAO', price: 'MZN 225.00', category: 'SAMOSSA 24Uni' },
     { id: 'SP12B', name: 'SPRINGROLL12-BEEF', price: 'MZN 180.00', category: 'SPRING ROLL 12 Uni' },
     { id: 'SP12F', name: 'SPRINGROLL12-FRANGO', price: 'MZN 180.00', category: 'SPRING ROLL 12 Uni' },
