@@ -1,0 +1,17 @@
+food-champion-factory//
+├── index.html          (Complete HTML - ALL features)
+├── style.css           (Complete CSS - ALL styles)
+├── app.js              (Main application)
+├── auth.js             (Authentication)
+├── dropbox-sync.js     (Dropbox sync)
+├── excel-import.js     (Excel import)
+├── ingredients.js      (Ingredients management)
+├── recipes.js          (Recipe management)
+├── config.js           (Configuration)
+├── manifest.json       (PWA manifest)
+├── service-worker.js   (Offline support)
+└── icons/
+    ├── icon-192.png    (App icon 192x192)
+    └── icon-512.png    (App icon 512x512)
+	
+	
